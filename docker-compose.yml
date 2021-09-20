@@ -9,6 +9,10 @@ services:
     networks:
       - crawler
     container_name: backend
+    depends_on:
+      - zookeeper
+      - kafka
+      - db
     env_file: 
       - .env
     environment:
