@@ -1,0 +1,46 @@
+version: "3.5"
+
+services: 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: backend
+    networks:
+      - crawler
+    stdin_open: true
+    tty: true
+    env_file: 
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+        - .:/app
+
+  db_admin:
+    image: mongo-express:0.54.0
+    container_name: db_admin
+    networks:
+      - crawler
+    ports:
+      - 8081:8081
+    env_file: 
+      - .env
+    environment:
+      ME_CONFIG_MONGODB_SERVER: db
+      ME_CONFIG_MONGODB_PORT: 27017
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop:3.27.0
+    container_name: kafdrop
+    depends_on:
+      - zookeeper
+      - kafka
+    networks:
+      - crawler
+    ports:
+      - "8082:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:29092"
+      JVM_OPTS: "-Xms16M -Xmx48M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
